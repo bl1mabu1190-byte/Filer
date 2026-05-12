@@ -1,0 +1,15 @@
+{
+  "appName": "NeuroCV AI",
+  "version": "1.0.0",
+  "theme": "dark",
+  "features": [
+    "AI CV Generator",
+    "GitHub Upload",
+    "Live Preview",
+    "Responsive Design",
+    "Animated Portfolio",
+    "Dark Mode",
+    "Download HTML",
+    "Copy URL"
+  ]
+}
