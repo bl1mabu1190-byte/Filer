@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI CV Generator</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+<div class="app">
+
+  <aside class="sidebar">
+    <h1>AI CV</h1>
+
+    <button id="themeToggle">Toggle Theme</button>
+
+    <button id="exportBtn">Export JSON</button>
+
+    <input type="file" id="importFile" hidden>
+    <button onclick="document.getElementById('importFile').click()">Import JSON</button>
+
+    <button onclick="window.print()">Print CV</button>
+  </aside>
+
+  <main class="main">
+
+    <div class="form-section glass">
+
+      <h2>Create CV</h2>
+
+      <input type="text" id="username" placeholder="Username">
+      <input type="text" id="name" placeholder="Full Name">
+      <input type="text" id="profession" placeholder="Profession">
+
+      <textarea id="bio" placeholder="Bio"></textarea>
+
+      <input type="text" id="skills" placeholder="Skills (comma separated)">
+      <input type="text" id="education" placeholder="Education">
+      <input type="text" id="experience" placeholder="Experience">
+      <input type="text" id="projects" placeholder="Projects">
+      <input type="text" id="certifications" placeholder="Certifications">
+      <input type="text" id="languages" placeholder="Languages">
+
+      <input type="text" id="socials" placeholder="Social Links">
+
+      <input type="file" id="profileImage">
+
+      <h3>Tools</h3>
+
+      <div id="toolsContainer"></div>
+
+      <button id="addToolBtn">Add Tool</button>
+
+      <button id="generateBtn">Generate CV</button>
+
+    </div>
+
+    <div class="preview-section glass">
+
+      <h2>Live Preview</h2>
+
+      <iframe id="previewFrame"></iframe>
+
+      <div class="result-actions">
+
+        <button id="copyBtn">Copy URL</button>
+        <button id="openBtn">Open CV</button>
+        <button id="downloadBtn">Download HTML</button>
+
+      </div>
+
+      <div id="qrcode"></div>
+
+    </div>
+
+  </main>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
