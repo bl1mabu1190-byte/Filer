@@ -1,290 +1,96 @@
-let uploadedImage = "";
+import { generateCVTemplate } from "./templates/cv-template.js";
 
+const form = document.getElementById("cvForm");
 const previewFrame = document.getElementById("previewFrame");
+const toolsContainer = document.getElementById("toolsContainer");
 
-document.getElementById("profileImage").addEventListener("change", e=>{
-  const file = e.target.files[0];
+const successModal = document.getElementById("successModal");
+const generatedUrl = document.getElementById("generatedUrl");
 
-  const reader = new FileReader();
+let latestHTML = "";
 
-  reader.onload = ()=>{
-    uploadedImage = reader.result;
-    updatePreview();
-  }
+function showToast(message){
+  const toast = document.getElementById("toast");
 
-  reader.readAsDataURL(file);
-});
+  toast.innerText = message;
+  toast.style.display = "block";
 
-document.getElementById("addToolBtn").addEventListener("click", ()=>{
+  setTimeout(()=>{
+    toast.style.display = "none";
+  },3000);
+}
+
+function addToolField(){
 
   const div = document.createElement("div");
 
-  div.className = "tool-card";
+  div.className = "tool-item";
 
   div.innerHTML = `
-    <input placeholder="Tool Name" class="tool-name">
-    <input placeholder="Icon URL" class="tool-icon">
-    <input placeholder="Tool Link" class="tool-link">
-    <button class="removeTool">Remove</button>
+    <input type="text" placeholder="Tool Name" class="tool-name"/>
+    <input type="text" placeholder="Tool Icon URL" class="tool-icon"/>
+    <input type="text" placeholder="Tool Website Link" class="tool-link"/>
   `;
 
-  div.querySelector(".removeTool").onclick = ()=>div.remove();
+  toolsContainer.appendChild(div);
+}
 
-  document.getElementById("toolsContainer").appendChild(div);
-});
+document.getElementById("addToolBtn")
+.addEventListener("click", addToolField);
 
-function getData(){
+addToolField();
+
+function getFormData(){
 
   const tools = [];
 
-  document.querySelectorAll(".tool-card").forEach(card=>{
+  document.querySelectorAll(".tool-item").forEach(item=>{
 
     tools.push({
-      name:card.querySelector(".tool-name").value,
-      icon:card.querySelector(".tool-icon").value,
-      link:card.querySelector(".tool-link").value
+      name:item.querySelector(".tool-name").value,
+      icon:item.querySelector(".tool-icon").value,
+      link:item.querySelector(".tool-link").value
     });
 
   });
 
   return {
-    username:document.getElementById("username").value,
-    name:document.getElementById("name").value,
-    profession:document.getElementById("profession").value,
-    bio:document.getElementById("bio").value,
-    skills:document.getElementById("skills").value.split(","),
-    education:document.getElementById("education").value,
-    experience:document.getElementById("experience").value,
-    projects:document.getElementById("projects").value,
-    certifications:document.getElementById("certifications").value,
-    languages:document.getElementById("languages").value,
-    socials:document.getElementById("socials").value,
-    tools,
-    image:uploadedImage
+    fullName:fullName.value,
+    username:username.value,
+    profileImage:profileImage.value,
+    profession:profession.value,
+    about:about.value,
+    email:email.value,
+    phone:phone.value,
+    address:address.value,
+    website:website.value,
+    github:github.value,
+    linkedin:linkedin.value,
+    skills:skills.value.split(","),
+    experience:experience.value,
+    education:education.value,
+    projects:projects.value,
+    certifications:certifications.value,
+    languages:languages.value,
+    interests:interests.value,
+    tools
   };
-}
-
-function generateCVHTML(data){
-
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>${data.name}</title>
-
-<style>
-
-body{
-  font-family:Arial;
-  background:#0f172a;
-  color:white;
-  padding:40px;
-}
-
-.card{
-  background:#111827;
-  padding:30px;
-  border-radius:20px;
-}
-
-img{
-  width:140px;
-  height:140px;
-  border-radius:50%;
-  object-fit:cover;
-}
-
-.skills span{
-  display:inline-block;
-  background:#2563eb;
-  padding:8px 15px;
-  margin:5px;
-  border-radius:30px;
-}
-
-.tool{
-  margin-top:10px;
-  padding:10px;
-  background:#1e293b;
-  border-radius:10px;
-}
-
-a{
-  color:#38bdf8;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div class="card">
-
-<img src="${data.image}">
-
-<h1>${data.name}</h1>
-
-<h2>${data.profession}</h2>
-
-<p>${data.bio}</p>
-
-<h3>Skills</h3>
-
-<div class="skills">
-${data.skills.map(skill=>`<span>${skill}</span>`).join("")}
-</div>
-
-<h3>Education</h3>
-<p>${data.education}</p>
-
-<h3>Experience</h3>
-<p>${data.experience}</p>
-
-<h3>Projects</h3>
-<p>${data.projects}</p>
-
-<h3>Certifications</h3>
-<p>${data.certifications}</p>
-
-<h3>Languages</h3>
-<p>${data.languages}</p>
-
-<h3>Social Links</h3>
-<p>${data.socials}</p>
-
-<h3>Tools</h3>
-
-${data.tools.map(tool=>`
-<div class="tool">
-  <img src="${tool.icon}" width="40">
-  <a href="${tool.link}" target="_blank">${tool.name}</a>
-</div>
-`).join("")}
-
-</div>
-
-</body>
-</html>
-`;
 }
 
 function updatePreview(){
 
-  const html = generateCVHTML(getData());
+  const data = getFormData();
 
-  previewFrame.srcdoc = html;
+  latestHTML = generateCVTemplate(data);
 
-  localStorage.setItem("cvData", JSON.stringify(getData()));
+  previewFrame.srcdoc = latestHTML;
+
+  localStorage.setItem("cvData", JSON.stringify(data));
 }
 
-document.querySelectorAll("input,textarea").forEach(el=>{
-  el.addEventListener("input", updatePreview);
-});
+form.addEventListener("input", updatePreview);
 
-async function uploadToGitHub(){
-
-  const data = getData();
-
-  const html = generateCVHTML(data);
-
-  const response = await fetch("/api/save-cv",{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify({
-      username:data.username,
-      html
-    })
-  });
-
-  const result = await response.json();
-
-  if(result.url){
-
-    currentURL = result.url;
-
-    alert("CV Uploaded!");
-
-    new QRCode(document.getElementById("qrcode"), result.url);
-
-  }
-
-}
-
-document.getElementById("generateBtn").addEventListener("click", uploadToGitHub);
-
-let currentURL = "";
-
-document.getElementById("copyBtn").onclick = ()=>{
-  navigator.clipboard.writeText(currentURL);
-};
-
-document.getElementById("openBtn").onclick = ()=>{
-  window.open(currentURL);
-};
-
-document.getElementById("downloadBtn").onclick = ()=>{
-
-  const blob = new Blob([generateCVHTML(getData())],{
-    type:"text/html"
-  });
-
-  const a = document.createElement("a");
-
-  a.href = URL.createObjectURL(blob);
-
-  a.download = `${getData().username}.html`;
-
-  a.click();
-};
-
-document.getElementById("exportBtn").onclick = ()=>{
-
-  const blob = new Blob([JSON.stringify(getData(),null,2)],{
-    type:"application/json"
-  });
-
-  const a = document.createElement("a");
-
-  a.href = URL.createObjectURL(blob);
-
-  a.download = "cv-data.json";
-
-  a.click();
-};
-
-document.getElementById("importFile").addEventListener("change",e=>{
-
-  const file = e.target.files[0];
-
-  const reader = new FileReader();
-
-  reader.onload = ()=>{
-
-    const data = JSON.parse(reader.result);
-
-    Object.keys(data).forEach(key=>{
-
-      const el = document.getElementById(key);
-
-      if(el){
-        el.value = data[key];
-      }
-
-    });
-
-    updatePreview();
-
-  }
-
-  reader.readAsText(file);
-
-});
-
-window.onload = ()=>{
+window.addEventListener("load",()=>{
 
   const saved = localStorage.getItem("cvData");
 
@@ -294,16 +100,98 @@ window.onload = ()=>{
 
     Object.keys(data).forEach(key=>{
 
-      const el = document.getElementById(key);
-
-      if(el){
-        el.value = data[key];
+      if(document.getElementById(key)){
+        document.getElementById(key).value = data[key];
       }
 
     });
 
     updatePreview();
+  }
+
+});
+
+form.addEventListener("submit", async(e)=>{
+
+  e.preventDefault();
+
+  const data = getFormData();
+
+  latestHTML = generateCVTemplate(data);
+
+  try{
+
+    showToast("Uploading CV...");
+
+    const response = await fetch("/api/upload",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        username:data.username,
+        html:latestHTML
+      })
+    });
+
+    const result = await response.json();
+
+    if(result.success){
+
+      successModal.classList.remove("hidden");
+
+      generatedUrl.value = result.url;
+
+      document.getElementById("openCvBtn")
+      .href = result.url;
+
+      showToast("CV Generated Successfully");
+
+    }else{
+      throw new Error(result.error);
+    }
+
+  }catch(err){
+
+    console.error(err);
+
+    showToast("Generation failed");
 
   }
 
-};
+});
+
+document.getElementById("copyBtn")
+.addEventListener("click",()=>{
+
+  navigator.clipboard.writeText(generatedUrl.value);
+
+  showToast("URL Copied");
+
+});
+
+document.getElementById("downloadBtn")
+.addEventListener("click",()=>{
+
+  const blob = new Blob([latestHTML],{
+    type:"text/html"
+  });
+
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+
+  a.href = url;
+
+  a.download = `${username.value}.html`;
+
+  a.click();
+
+});
+
+document.getElementById("themeToggle")
+.addEventListener("click",()=>{
+
+  document.body.classList.toggle("light");
+
+});
